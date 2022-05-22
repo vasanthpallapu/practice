@@ -1,0 +1,1 @@
+{"main":"api.raml","name":"customer-sapi-raml","tags":[],"classifier":"raml","dependencies":[{"groupId":"4521e45d-a45c-4b68-8b4a-3061d71822d8","assetId":"common-fragment","version":"1.0.3"}],"groupId":"4521e45d-a45c-4b68-8b4a-3061d71822d8","assetId":"customer-sapi-raml","version":"1.0.2","apiVersion":"1.0.0","originalFormatVersion":"1.0"}
