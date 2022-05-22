@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="post-customer-registration-implementation-Flow"
+		doc:id="32898bdf-dd57-42a3-8676-6737f2a51567">
+		<logger level="INFO" doc:name="Request Logger Fro SFDC Call " doc:id="adaffd52-dd65-44ba-8995-6b8566367b10" message="#[%dw 2.0&#10;output application/json indent = false  &#10;---  &#10;{  	&#10;    TimeStamp: now(), 	&#10;    transactionId: vars.headers.'x-cms-transactionId', 	&#10;    AppName: app.name, 	&#10;    FlowName: flow.name, 	&#10;    BusinessProcessName:  &quot;Verification&quot;, 	&#10;    Category:  &quot;Customer&quot;, 	&#10;    OriginatingApplication:  &quot;Experience API&quot;, 	&#10;    DesinationApplication:  &quot;System API&quot;, 	&#10;    CustomerId: &quot;NA&quot;, 	&#10;    txnState:  &quot;PAPI Request&quot; &#10;}]"/>
+	<ee:transform doc:name="Transform Message for Customer State API Call" doc:id="49659f31-3d20-437f-b7c0-8fada43ea306" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "customerStateRequest": {
+    "contactType": vars.requestPayload.registrationRequest.contactType,
+    "countryCode": vars.requestPayload.registrationRequest.countryCode,
+    "mobile": vars.requestPayload.registrationRequest.mobile,
+    "password": vars.requestPayload.registrationRequest.password,
+    "status": false
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="POST" doc:name="Request Customer State  PAPI" doc:id="42f7a0ec-60cc-47da-bef6-9c4ff75f4e57" path="${http.requester.customer.papi.pathCustomerState}" config-ref="HTTP_Request_configuration_Customer_PAPI" responseTimeout="1000000">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"clientSecret" : vars.headers.clientSecret,
+	"x-cms-transactionId" : vars.headers.'x-cms-transactionId',
+	"clientId" : vars.headers.clientId
+}]]]></http:headers>
+			<http:response-validator >
+				<http:success-status-code-validator values="100..599" />
+			</http:response-validator>
+		</http:request>
+		<choice doc:name="Choice" doc:id="4de0c2d7-4767-426c-91e3-f079a6749ed3" >
+			<when expression="#[attributes.statusCode != 200 and attributes.statusCode != 201]">
+				<set-variable value="#[attributes.statusCode]" doc:name="Set Variable" doc:id="3f4df851-9a35-40b7-b3e1-6335dfdcb9f6" variableName="httpStatus"/>
+			</when>
+			<otherwise>
+				<http:request method="POST" doc:name="Request Customer Registration SAPI" doc:id="234a982d-1a0e-4465-8733-41eec5b004fa" config-ref="HTTP_Request_configuration_Customer_SAPI" path="${http.requester.customer.sapi.pathCustomerRegistration}" responseTimeout="#[1000000]">
+					<http:body ><![CDATA[#[vars.requestPayload]]]></http:body>
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	"clientSecret" : vars.headers.clientSecret,
+	"x-cms-transactionId" : vars.headers.'x-cms-transactionId',
+	"clientId" : vars.headers.clientId
+}]]]></http:headers>
+					<http:response-validator >
+						<http:success-status-code-validator values="100..599" />
+					</http:response-validator>
+				</http:request>
+				<choice doc:name="Choice" doc:id="6f4ee8f0-2789-41b2-9b51-c0da191524f0" >
+					<when expression="#[attributes.statusCode != 200 and attributes.statusCode != 201]">
+						<set-variable value="#[attributes.statusCode]" doc:name="Set Variable" doc:id="809bdfaa-255c-4519-9960-bab49c7f7294" variableName="httpStatus" />
+					</when>
+					<otherwise >
+						<ee:transform doc:name="Transform Message" doc:id="4a94f859-2a70-457b-a2a0-20f99c27883c">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "verificationRequest": {
+    "contactType": vars.requestPayload.registrationRequest.contactType,
+    "countryCode": vars.requestPayload.registrationRequest.countryCode,
+    "mobile": vars.requestPayload.registrationRequest.mobile,
+    "messageContent": "12345"
+  }
+}]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<http:request method="POST" doc:name="Request Customer Verification PAPI" doc:id="0d246e69-59ac-46cb-8403-28e4b28f0460" config-ref="HTTP_Request_configuration_Customer_PAPI" path="${http.requester.customer.papi.pathVerification}">
+							<http:headers ><![CDATA[#[output application/java
+---
+{
+	"clientSecret" : vars.headers.clientSecret,
+	"x-cms-transactionId" : vars.headers.'x-cms-transactionId',
+	"clientId" : vars.headers.clientId
+}]]]></http:headers>
+						</http:request>
+						<choice doc:name="Choice" doc:id="d90a52bf-4d0d-451c-8ddc-f0f617998574" >
+							<when expression="#[attributes.statusCode != 200 and attributes.statusCode != 201]">
+								<set-variable value="#[attributes.statusCode]" doc:name="Set Variable" doc:id="1e508df7-2c57-4677-a6a2-636721daf39e" variableName="httpStatus" />
+							</when>
+							<otherwise >
+								<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:name="Transform Message to Create Registration SAPI Response">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  verificationRequest: {
+    eventInstanceId: vars.headers.'x-cms-transactionId',
+    status: "success"
+  }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+							</otherwise>
+						</choice>
+					</otherwise>
+				</choice>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Response Logger Fro SFDC Call " doc:id="c58f659a-420a-4ffc-945e-2189fb135105" message="#[%dw 2.0&#10;output application/json indent = false  &#10;---  &#10;{  	&#10;    TimeStamp: now(), 	&#10;    transactionId: vars.headers.'x-cms-transactionId', 	&#10;    AppName: app.name, 	&#10;    FlowName: flow.name, 	&#10;    BusinessProcessName:  &quot;Customer State&quot;, 	&#10;    Category:  &quot;Customer&quot;, 	&#10;    OriginatingApplication:  &quot;Verification&quot;, 	&#10;    DesinationApplication:  &quot;System API&quot;, 	&#10;    CustomerId: &quot;NA&quot;, 	&#10;    txnState:  &quot;SAPI Response&quot; &#10;}]"/>
+	</flow>
+</mule>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	 <http:listener-config name="api-httpListenerConfig">
+        <http:listener-connection host="${http.listener.host}" port="${http.listener.port}" />
+    </http:listener-config>
+    <http:request-config name="HTTP_Request_configuration_Customer_SAPI" doc:name="HTTP Request configuration" doc:id="dc9cd6e7-2bcd-4889-bd0c-630df8290ae6" >
+		<http:request-connection host="${http.requester.customer.sapi.host}" port="${http.requester.customer.sapi.port}" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration_Customer_PAPI" doc:name="HTTP Request configuration" doc:id="1c01dea2-7794-4f05-96d3-e2939aa25fa0" >
+		<http:request-connection host="${http.requester.customer.papi.host}" port="${http.requester.customer.papi.port}" />
+	</http:request-config>
+    <apikit:config name="api-config" api="api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <configuration-properties doc:name="Configuration properties" doc:id="722184e5-dad4-4fd6-9462-d42d8f446d2e" file="properties/${env}.yaml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="6ab87051-27bb-487a-bf4a-68233ebc5da5" file="properties/constraints/error-details.yaml" />
+	<configuration doc:name="Configuration" doc:id="a7ebf537-695c-4aaa-8820-535c2910ff67" defaultErrorHandler-ref="apikit-global-errorError_Handler" />
+	<api-gateway:autodiscovery apiId="${instanceID}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="468122fd-9cc9-4c59-bed8-10006e539fcf" flowRef="api-main" />
+	</mule>

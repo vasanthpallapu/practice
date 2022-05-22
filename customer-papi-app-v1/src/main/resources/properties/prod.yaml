@@ -1,0 +1,19 @@
+instanceID: "17608106"
+
+http:
+  listener:
+    host: "0.0.0.0"
+    port: "8082"
+  requester:
+    customer:
+      sapi:
+        host: "0.0.0.0"
+        port: "8081"
+        pathCustomerState: "/api/customerState"
+        pathVerification: "/api/verification"
+        pathCustomerRegistration: "/api/customers/registration"
+      papi:
+        host: "0.0.0.0"
+        port: "8082"
+        pathCustomerState: "/api/customerState"
+        pathVerification: "/api/verification"

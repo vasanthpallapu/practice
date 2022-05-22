@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="error-response-subFlow" doc:id="cbf33b68-ea52-455b-a85a-d45a50eef34b" >
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:name="Transform Message for error Request" doc:id="80f5b9b5-4550-44d5-859f-4b7ac794990a">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "msg": "successful operation",
+  "code": vars.code,
+  "success": true,
+  "eventId": attributes.headers.'x-cms-transactionId',
+  "error": {
+    "type": vars.errorType,
+    "title": vars.title,
+    "details": vars.details
+  }
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                    </ee:variables>
+                </ee:transform>
+	</sub-flow>
+	<sub-flow name="initialise-request-data-subFlow" doc:id="f157c248-9257-478f-924c-3f1c9f42e831" >
+		<ee:transform doc:name="Transform Message Initialize Variables" doc:id="b858b9e3-9fdf-43ae-86d0-7dea909ed233">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="headers"><![CDATA[attributes.headers default ""]]></ee:set-variable>
+				<ee:set-variable variableName="queryParams"><![CDATA[attributes.queryParams default ""]]></ee:set-variable>
+				<ee:set-variable variableName="uriParams"><![CDATA[attributes.uriParams default ""]]></ee:set-variable>
+				<ee:set-variable variableName="requestPayload"><![CDATA[payload default ""]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</sub-flow>
+</mule>
