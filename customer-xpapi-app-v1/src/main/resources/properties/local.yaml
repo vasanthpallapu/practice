@@ -1,0 +1,55 @@
+instanceID: "17608132"
+
+http:
+  listener:
+    host: "0.0.0.0"
+    port: "8083"
+  requester:
+    customer:
+      papi:
+        host: "0.0.0.0"
+        port: "8082"
+        pathCustomerRegistration: "/api/customers/registration"
+
+
+    
+        
+            
+                
+                    
+                        
+                            
+                                
+                                    
+                                        
+                                            
+                                                
+                                                    
+                                                        
+                                                            
+                                                                
+                                                                    
+                                                                        
+                                                                            
+                                                                                
+                                                                                    
+                                                                                        
+                                                                                            
+                                                                                                
+                                                                                                    
+                                                                                                        
+                                                                                                            
+                                                                                                                
+                                                                                                                    
+                                                                                                                        
+                                                                                                                            
+                                                                                                                                
+                                                                                                                                    
+                                                                                                                                            
+sfdc:
+  username: "kumarmuletraining1@gmail.com"
+  password: "ABCD@1234@abcd"
+  securityToken: "whLO4wdVTLZnB1WGphxoZpl4"
+
+
+
